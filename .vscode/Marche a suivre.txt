@@ -1,0 +1,743 @@
+# ===== Challenge 1 : Pipeline d'analyse de données =====
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+
+# 1️⃣ Charger le dataset
+dataset_path = "clean_sensor_dataset.csv"  # mets le chemin correct
+if not os.path.exists(dataset_path):
+    raise FileNotFoundError(f"Le fichier {dataset_path} est introuvable.")
+
+df = pd.read_csv(dataset_path)
+
+# Afficher les 5 premières lignes
+print("----- Head du dataset -----")
+print(df.head())
+
+# 2️⃣ Nettoyer les données (valeurs manquantes)
+print("\n----- Valeurs manquantes par colonne -----")
+print(df.isna().sum())
+
+# Remplacer les NaN par la moyenne de chaque colonne
+df['temperature'].fillna(df['temperature'].mean(), inplace=True)
+df['humidity'].fillna(df['humidity'].mean(), inplace=True)
+df['pressure'].fillna(df['pressure'].mean(), inplace=True)
+
+# 3️⃣ Arrondir à 2 chiffres après la virgule
+df['temperature'] = df['temperature'].round(2)
+df['humidity'] = df['humidity'].round(2)
+df['pressure'] = df['pressure'].round(2)
+
+print("\n----- Head après nettoyage et arrondi -----")
+print(df.head())
+
+# 4️⃣ Calculer des statistiques et stocker dans un dictionnaire
+results = {
+    'mean_temperature': df['temperature'].mean(),
+    'max_temperature': df['temperature'].max(),
+    'min_temperature': df['temperature'].min(),
+    'mean_humidity': df['humidity'].mean(),
+    'max_humidity': df['humidity'].max(),
+    'min_humidity': df['humidity'].min(),
+    'mean_pressure': df['pressure'].mean(),
+    'max_pressure': df['pressure'].max(),
+    'min_pressure': df['pressure'].min()
+}
+
+print("\n----- Statistiques calculées -----")
+for key, value in results.items():
+    print(f"{key}: {round(value, 2)}")
+
+# 5️⃣ Visualisation des données
+plt.figure(figsize=(12,6))
+plt.plot(df['timestamp'], df['temperature'], label='Temperature (°C)', color='red')
+plt.plot(df['timestamp'], df['humidity'], label='Humidity (%)', color='blue')
+plt.plot(df['timestamp'], df['pressure'], label='Pressure (hPa)', color='green')
+plt.xticks(rotation=45)
+plt.xlabel("Timestamp")
+plt.ylabel("Valeurs")
+plt.title("Mesures des capteurs dans le temps")
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+# 6️⃣ Écrire un rapport texte
+report_path = "rapport_analysis.txt"
+with open(report_path, "w") as f:
+    f.write("===== Rapport d'analyse du dataset capteurs =====\n\n")
+    f.write("Statistiques :\n")
+    for key, value in results.items():
+        f.write(f"{key}: {round(value, 2)}\n")
+    f.write("\nDataset nettoyé (5 premières lignes) :\n")
+    f.write(df.head().to_string())
+    
+print(f"\n✅ Rapport généré : {report_path}")
+Ce que fait ce pipeline :
+Lit le CSV avec pandas
+
+Affiche le head()
+
+Nettoie les valeurs manquantes en les remplaçant par la moyenne
+
+Arrondit à 2 chiffres les colonnes numériques
+
+Calcule les statistiques importantes et les stocke dans un dictionnaire
+
+Trace un graphique combiné des 3 mesures
+
+Génère un rapport texte contenant les statistiques et un extrait du dataset
+
+Si tu veux, je peux maintenant te faire une version améliorée où :
+
+les graphiques sont séparés pour chaque mesure
+
+le rapport est plus joli (avec des alertes sur anomalies, min/max)
+
+le pipeline est prêt à prendre n’importe quel dataset du même type.
+
+Veux‑tu que je fasse cette version améliorée ?
+
+
+
+
+
+
+
+Vous avez dit :
+explique en detail ce tous ce que tu as fait et comment nettoyer les donnes 
+
+
+ChatGPT a dit :
+Parfait ! On va détailler tout le pipeline étape par étape, pour que tu comprennes ce que fait chaque partie et comment nettoyer les données. Je vais rester clair et précis.
+
+1️⃣ Charger le dataset
+python
+Copier le code
+df = pd.read_csv(dataset_path)
+print(df.head())
+pd.read_csv() : lit un fichier CSV et le transforme en DataFrame (tableau à 2 dimensions, comme un tableau Excel).
+
+df.head() : affiche les 5 premières lignes pour vérifier que les données ont été correctement chargées.
+
+Cette étape sert à visualiser le dataset brut avant nettoyage.
+
+2️⃣ Détecter les valeurs manquantes
+python
+Copier le code
+print(df.isna().sum())
+df.isna() → retourne un tableau de True/False indiquant si chaque cellule est vide (NaN).
+
+.sum() → compte le nombre de valeurs manquantes par colonne.
+
+Exemple de sortie possible :
+
+sql
+Copier le code
+timestamp      0
+temperature   10
+humidity      12
+pressure       8
+Ici on voit qu’il y a des données manquantes dans temperature, humidity et pressure.
+
+C’est normal et c’est ce que le challenge veut que tu nettoies.
+
+3️⃣ Nettoyer les données
+python
+Copier le code
+df['temperature'].fillna(df['temperature'].mean(), inplace=True)
+Comment ça marche :
+
+fillna(value) → remplace les NaN par value.
+
+df['temperature'].mean() → calcule la moyenne de la colonne.
+
+inplace=True → applique le changement directement dans df sans créer une nouvelle copie.
+
+Pourquoi choisir la moyenne ?
+
+Pour les capteurs, remplacer les valeurs manquantes par la moyenne est simple et logique.
+
+Autres options possibles :
+
+df.dropna() → supprimer les lignes avec des NaN (attention, tu perds des données)
+
+df.fillna(method='ffill') → remplir avec la valeur précédente
+
+df.fillna(method='bfill') → remplir avec la valeur suivante
+
+On fait la même chose pour humidity et pressure.
+
+4️⃣ Arrondir à 2 chiffres
+python
+Copier le code
+df['temperature'] = df['temperature'].round(2)
+round(2) → arrondit les nombres à 2 décimales.
+
+Permet d’avoir un dataset plus lisible et uniforme.
+
+5️⃣ Calculer des statistiques et les stocker
+python
+Copier le code
+results = {
+    'mean_temperature': df['temperature'].mean(),
+    'max_temperature': df['temperature'].max(),
+    ...
+}
+.mean() → moyenne
+
+.max() → valeur maximale
+
+.min() → valeur minimale
+
+Stocker dans un dictionnaire permet de :
+
+conserver toutes les stats
+
+les utiliser plus facilement pour le rapport ou la visualisation
+
+6️⃣ Visualisation
+python
+Copier le code
+plt.plot(df['timestamp'], df['temperature'], color='red')
+matplotlib.pyplot permet de tracer des graphiques.
+
+Ici on trace Temperature, Humidity et Pressure dans le temps.
+
+plt.xticks(rotation=45) → tourne les dates pour les lire facilement.
+
+plt.tight_layout() → ajuste le graphique pour éviter que les labels se chevauchent.
+
+Visualiser les données permet de repérer les anomalies ou tendances.
+
+7️⃣ Écrire un rapport
+python
+Copier le code
+with open("rapport_analysis.txt", "w") as f:
+    f.write(...)
+Ouvre un fichier texte en écriture (w)
+
+Écrit les statistiques et un extrait du dataset
+
+Ce fichier peut servir de livrable ou compte-rendu pour ton challenge.
+
+Résumé sur le nettoyage des données
+Identifier les NaN → df.isna().sum()
+
+Remplacer ou supprimer :
+
+fillna(moyenne) → garde toutes les lignes
+
+dropna() → supprime les lignes avec NaN
+
+ffill / bfill → remplir avec la valeur précédente/suivante
+
+Arrondir les colonnes numériques pour lisibilité
+
+Vérifier que plus aucune valeur manquante n’existe → df.isna().sum() doit retourner 0
+
+✅ Conclusion :
+
+Avec ce pipeline, tu passes d’un dataset brut et incomplet à un dataset propre et prêt à analyser, tu calcules des statistiques, tu produis des graphiques et un rapport.
+
+Si tu veux, je peux te faire une version améliorée de ce pipeline qui :
+
+fait des graphiques séparés par colonne,
+
+détecte et signale les anomalies (ex : valeurs très éloignées de la moyenne),
+
+produit un rapport plus complet.
+
+Veux‑tu que je fasse ça ?
+
+---------------------------------------------------------------------------------------------------
+
+
+Parfait ! Voici une version améliorée du pipeline Challenge 1, plus complète et professionnelle. Elle inclut :
+
+Nettoyage des données
+
+Arrondi
+
+Calcul de statistiques
+
+Détection d’anomalies (valeurs trop hautes ou trop basses)
+
+Graphiques séparés pour chaque colonne
+
+Rapport texte détaillé
+
+# ===== Pipeline avancé Challenge 1 =====
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+
+# 1️⃣ Charger le dataset
+dataset_path = "clean_sensor_dataset.csv"  # modifie le chemin si nécessaire
+if not os.path.exists(dataset_path):
+    raise FileNotFoundError(f"Le fichier {dataset_path} est introuvable.")
+
+df = pd.read_csv(dataset_path)
+print("----- Head du dataset -----")
+print(df.head())
+
+# 2️⃣ Nettoyer les données (valeurs manquantes)
+print("\n----- Valeurs manquantes avant nettoyage -----")
+print(df.isna().sum())
+
+# Remplacer les NaN par la moyenne de la colonne
+for col in ['temperature', 'humidity', 'pressure']:
+    df[col].fillna(df[col].mean(), inplace=True)
+
+# Arrondir à 2 chiffres
+for col in ['temperature', 'humidity', 'pressure']:
+    df[col] = df[col].round(2)
+
+print("\n----- Head après nettoyage et arrondi -----")
+print(df.head())
+
+# 3️⃣ Calculer statistiques
+stats = {}
+for col in ['temperature', 'humidity', 'pressure']:
+    stats[col] = {
+        'mean': df[col].mean(),
+        'max': df[col].max(),
+        'min': df[col].min(),
+        'std': df[col].std()  # écart-type
+    }
+
+print("\n----- Statistiques -----")
+for col, stat in stats.items():
+    print(f"\n{col}:")
+    for k, v in stat.items():
+        print(f"  {k}: {round(v,2)}")
+
+# 4️⃣ Détection d'anomalies (valeurs > mean ± 2*std)
+anomalies = {}
+for col in ['temperature', 'humidity', 'pressure']:
+    mean, std = stats[col]['mean'], stats[col]['std']
+    anomalies[col] = df[(df[col] > mean + 2*std) | (df[col] < mean - 2*std)]
+    print(f"\nNombre d'anomalies dans {col}: {len(anomalies[col])}")
+
+# 5️⃣ Visualisation (graphique séparé)
+plt.figure(figsize=(15,5))
+plt.plot(df['timestamp'], df['temperature'], color='red')
+plt.title("Temperature dans le temps")
+plt.xlabel("Timestamp")
+plt.ylabel("Temperature (°C)")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(15,5))
+plt.plot(df['timestamp'], df['humidity'], color='blue')
+plt.title("Humidity dans le temps")
+plt.xlabel("Timestamp")
+plt.ylabel("Humidity (%)")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(15,5))
+plt.plot(df['timestamp'], df['pressure'], color='green')
+plt.title("Pressure dans le temps")
+plt.xlabel("Timestamp")
+plt.ylabel("Pressure (hPa)")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+# 6️⃣ Générer un rapport texte complet
+report_path = "rapport_analysis_avance.txt"
+with open(report_path, "w") as f:
+    f.write("===== Rapport avancé d'analyse du dataset =====\n\n")
+    f.write("Statistiques :\n")
+    for col, stat in stats.items():
+        f.write(f"\n{col}:\n")
+        for k, v in stat.items():
+            f.write(f"  {k}: {round(v,2)}\n")
+    f.write("\n----- Anomalies détectées -----\n")
+    for col, df_anom in anomalies.items():
+        f.write(f"\n{col} ({len(df_anom)} anomalies):\n")
+        if len(df_anom) > 0:
+            f.write(df_anom.to_string(index=False))
+        else:
+            f.write("  Aucune anomalie détectée.")
+    f.write("\n\n----- Extrait dataset nettoyé -----\n")
+    f.write(df.head().to_string())
+
+print(f"\n✅ Rapport avancé généré : {report_path}")
+
+Améliorations incluses :
+
+Écart-type ajouté pour mieux comprendre la dispersion des données.
+
+Détection des anomalies → valeurs supérieures ou inférieures à mean ± 2*std.
+
+Graphiques séparés pour chaque colonne, plus lisibles.
+
+Rapport texte détaillé :
+
+Statistiques complètes
+
+Anomalies détectées
+
+Extrait du dataset nettoyé
+
+
+
+____________________________________________________________________________________________________________________________________________________________Voici un tutoriel complet, simple et clair, sur les visualisations les plus importantes en Python pour analyser un dataset comme ton dataset sensoriel (température, humidité, pression, luminosité).
+
+Il est organisé en 5 parties :
+
+1️⃣ Préparation
+2️⃣ Histogrammes
+3️⃣ Boxplots
+4️⃣ Courbes temporelles
+5️⃣ Scatter plots (corrélations)
+6️⃣ Heatmap
+7️⃣ Interprétation guidée
+
+Tout est illustré avec du code Python prêt à copier–coller, en utilisant Pandas + Matplotlib + Seaborn.
+
+📌 1. PRÉPARATION : Charger et nettoyer les données
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+df = pd.read_csv("sensor_dataset.csv")
+
+
+Aperçu rapide :
+
+print(df.head())
+print(df.describe())
+
+📊 2. HISTOGRAMMES — Répartition d’une variable
+✔️ Ce que l’histogramme montre
+
+Comment les valeurs sont distribuées (normale ? biaisée ? aplatie ?)
+
+Où se trouvent les valeurs fréquentes
+
+La présence éventuelle d’anomalies
+
+✔️ Exemple pour la température
+plt.hist(df['temperature'], bins=20)
+plt.xlabel("Température (°C)")
+plt.ylabel("Fréquence")
+plt.title("Distribution des températures")
+plt.show()
+
+✔️ Comment interpréter ?
+
+Pic haut = valeur très fréquente
+
+Distribution large = forte variabilité
+
+Queue à droite = valeurs élevées plus nombreuses
+
+Deux pics = phénomène bi-modal → peut indiquer deux groupes de conditions
+
+📦 3. BOXPLOT — Détection d’anomalies et étendue
+✔️ Ce qu’un boxplot montre :
+
+Médiane
+
+Quartiles (Q1, Q3)
+
+Étendue
+
+Outliers (points isolés)
+
+✔️ Code :
+sns.boxplot(x=df['temperature'])
+plt.title("Boxplot de la température")
+plt.show()
+
+✔️ Interprétation :
+
+Bande centrale = médiane
+
+Longueur de la boîte = variabilité
+
+Points à l’extérieur = anomalies → capteur défectueux ou conditions rares
+
+📈 4. COURBE TEMPORELLE — Évolution dans le temps
+
+Si ton dataset a une colonne “timestamp”, fais ceci :
+
+df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+plt.plot(df['timestamp'], df['temperature'])
+plt.xlabel("Temps")
+plt.ylabel("Température (°C)")
+plt.title("Évolution de la température dans le temps")
+plt.show()
+
+✔️ Interprétation :
+
+Fluctuations saisonnières
+
+Moments de pics (chaleur, froid)
+
+Détection d'irrégularités → panne de capteur
+
+🔵 5. SCATTER PLOT — Corrélation entre deux valeurs
+
+Ex : Relation entre température et humidité
+
+plt.scatter(df['temperature'], df['humidity'])
+plt.xlabel("Température (°C)")
+plt.ylabel("Humidité (%)")
+plt.title("Corrélation Température ↔ Humidité")
+plt.show()
+
+✔️ Interprétation :
+
+Nuage serré en ligne montante → corrélation positive
+
+Nuage serré en ligne descendante → corrélation négative
+
+Nuage dispersé → pas de corrélation significative
+
+Forme en arc → relation non linéaire
+
+🟥 6. HEATMAP — Corrélation globale entre toutes les colonnes
+plt.figure(figsize=(8,6))
+sns.heatmap(df.corr(), annot=True, cmap="coolwarm")
+plt.title("Heatmap des corrélations")
+plt.show()
+
+✔️ Interprétation :
+
+1.0 = parfaite corrélation
+
+0 = aucune relation
+
+-1.0 = corrélation négative parfaite
+
+Couleur rouge = forte corrélation
+
+Couleur bleu = corrélation négative
+
+Cette visualisation est idéale pour comprendre comment les variables du dataset interagissent.
+
+🟢 7. PAIRPLOT — Toutes les relations d’un coup
+sns.pairplot(df)
+plt.show()
+
+✔️ Ce que ça montre :
+
+Toutes les distributions
+
+Toutes les corrélations
+
+Permet de repérer des clusters
+
+📘 INTERPRÉTATION GUIDÉE (EXEMPLE)
+
+Imaginons un dataset comme le tien :
+
+variable	explication utile
+temperature	climat, chaleur du capteur
+humidity	humidité de l’environnement
+pressure	météo, altitude
+luminosity	lumière (jour/nuit)
+
+🎯 Histogramme température
+→ montre l’environnement dominant où les mesures ont eu lieu.
+
+🎯 Boxplot humidité
+→ détecte les valeurs anormales (capteur endommagé ?).
+
+🎯 Courbe temporelle pression
+→ montre le cycle jour/nuit ou météo.
+
+🎯 Scatter température vs humidité
+→ on peut voir si la chaleur influence l’humidité.
+
+🎯 Heatmap
+→ utile pour découvrir si une variable peut être prédite par une autre.
+
+📦 Si tu veux, je peux te créer un script complet, qui :
+
+charge ton dataset
+
+génère automatiquement
+✔️ histogrammes
+✔️ boxplots
+✔️ heatmap
+✔️ courbes temporelles
+✔️ scatter plots
+
+enregistre chaque graphique dans un dossier /plots
+
+Souhaites-tu un script automatique clé en main ?
+____________________________________________________________________________________________________________________________________________________________
+Parfait !
+Voici un script Python complet, propre et prêt à exécuter, qui :
+
+✔️ Charge ton dataset
+✔️ Nettoie les données
+✔️ Génère automatiquement toutes les visualisations importantes
+✔️ Enregistre chaque image dans un dossier /plots
+✔️ Affiche chaque graphique à l’écran
+
+Il fonctionne avec n’importe quel fichier sensor_dataset.csv.
+
+✅ SCRIPT COMPLET D’ANALYSE + VISUALISATIONS
+
+📌 À copier dans un fichier :
+visualisation_sensor.py
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os
+
+# =============================
+# 1. Chargement du dataset
+# =============================
+df = pd.read_csv("sensor_dataset.csv")
+
+print("\nAPERÇU DU DATASET :\n", df.head())
+print("\nSTATISTIQUES :\n", df.describe())
+
+# Création du dossier plots
+if not os.path.exists("plots"):
+    os.makedirs("plots")
+
+# =============================
+# 2. Nettoyage basique
+# =============================
+
+# Conversion timestamp si existe
+if "timestamp" in df.columns:
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+
+# Suppression des lignes où toutes les valeurs sont manquantes
+df = df.dropna(how="all")
+
+# =============================
+# 3. HISTOGRAMMES
+# =============================
+
+numeric_cols = df.select_dtypes(include="number").columns
+
+for col in numeric_cols:
+    plt.figure(figsize=(7,4))
+    plt.hist(df[col].dropna(), bins=20)
+    plt.title(f"Histogramme de {col}")
+    plt.xlabel(col)
+    plt.ylabel("Fréquence")
+    plt.grid(alpha=0.3)
+    plt.savefig(f"plots/hist_{col}.png")
+    plt.show()
+
+# =============================
+# 4. BOXPLOTS
+# =============================
+for col in numeric_cols:
+    plt.figure(figsize=(7,2))
+    sns.boxplot(x=df[col])
+    plt.title(f"Boxplot de {col}")
+    plt.grid(alpha=0.3)
+    plt.savefig(f"plots/box_{col}.png")
+    plt.show()
+
+# =============================
+# 5. COURBE TEMPORELLE
+# =============================
+if "timestamp" in df.columns:
+    for col in numeric_cols:
+        plt.figure(figsize=(10,4))
+        plt.plot(df["timestamp"], df[col])
+        plt.title(f"Évolution temporelle de {col}")
+        plt.xlabel("Temps")
+        plt.ylabel(col)
+        plt.grid(alpha=0.3)
+        plt.savefig(f"plots/timeseries_{col}.png")
+        plt.show()
+
+# =============================
+# 6. SCATTER PLOTS (corrélation)
+# =============================
+for col1 in numeric_cols:
+    for col2 in numeric_cols:
+        if col1 != col2:
+            plt.figure(figsize=(7,4))
+            plt.scatter(df[col1], df[col2], alpha=0.6)
+            plt.title(f"Corrélation {col1} vs {col2}")
+            plt.xlabel(col1)
+            plt.ylabel(col2)
+            plt.grid(alpha=0.3)
+            plt.savefig(f"plots/scatter_{col1}_vs_{col2}.png")
+            plt.show()
+
+# =============================
+# 7. HEATMAP DES CORRÉLATIONS
+# =============================
+plt.figure(figsize=(8,6))
+sns.heatmap(df.corr(), annot=True, cmap="coolwarm", fmt=".2f")
+plt.title("Heatmap des corrélations")
+plt.savefig("plots/heatmap_corr.png")
+plt.show()
+
+# =============================
+# 8. PAIRPLOT GLOBAL
+# =============================
+sns.pairplot(df[numeric_cols])
+plt.savefig("plots/pairplot.png")
+plt.show()
+
+print("\n🎉 Toutes les visualisations ont été générées dans le dossier /plots.")
+
+📌 CE QUE CE SCRIPT FAIT EXACTEMENT
+✔️ Étape 1 : Charger + afficher un aperçu
+
+→ df.head() et df.describe()
+
+✔️ Étape 2 : Nettoyer le dataset
+
+→ Supprime lignes 100% vides
+→ Convertit timestamp en datetime
+
+✔️ Étape 3 : Histogrammes
+
+→ Pour comprendre la distribution de chaque variable
+
+✔️ Étape 4 : Boxplots
+
+→ Pour détecter anomalies et outliers
+
+✔️ Étape 5 : Courbe temporelle
+
+→ Si une colonne timestamp existe
+
+✔️ Étape 6 : Scatter plots
+
+→ Pour analyser les relations entre variables
+
+✔️ Étape 7 : Heatmap
+
+→ Pour voir toutes les corrélations en un coup d’œil
+
+✔️ Étape 8 : Pairplot
+
+→ Résumé graphique complet du dataset
+
+❓ Tu veux une version :
+
+plus courte ?
+
+plus professionnelle ?
+
+sans affichage (juste sauvegarde) ?
+
+qui génère automatiquement un rapport PDF ?
+
+qui détecte les anomalies automatiquement ?
+
+Dis-moi ce que tu veux améliorer et je te le fais !
